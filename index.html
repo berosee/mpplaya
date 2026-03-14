@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>mpplay - Album Art Click Feature</title>
+  <title>mpplay - Frameless Edition</title>
   <style>
     :root {
       --neon-blue: #00d2ff;
@@ -25,13 +25,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #121212;
+      background: #121212; /* 전체 배경색과 동일하게 */
       z-index: 100;
-      padding-bottom: 5px;
+      padding-bottom: 10px; /* 여백 약간 추가 */
       flex-shrink: 0;
     }
 
-    .player-card, .playlist-wrapper {
+    /* 카테고리 네비게이션 및 리스트 폭 유지 */
+    .nav, .playlist-wrapper {
       width: 92%;
       max-width: 360px;
     }
@@ -70,28 +71,34 @@
       border: 1px solid var(--neon-blue); 
     }
 
+    /* --- [수정] 플레이어 카드: 배경색, 테두리, 그림자 모두 제거 --- */
     .player-card {
-      background: #0f172a;
-      border-radius: 20px; padding: 15px 18px;
-      text-align: center; border: 1px solid rgba(0, 210, 255, 0.2);
+      width: 100%; /* 화면에 꽉 차게 */
+      background: none; /* 배경색 제거 */
+      border-radius: 0; /* 라운드 제거 */
+      padding: 0; /* 내부 여백 제거 */
+      text-align: center; 
+      border: none; /* 테두리 제거 */
+      box-shadow: none; /* 그림자 제거 */
     }
 
-    /* [수정] 앨범 아트 컨테이너: 클릭 가능하게 커서 변경 및 효과 추가 */
+    /* --- [수정] 앨범 아트: 크기를 키우고 화면에 맞춤 --- */
     .album-art-container {
-      width: 100%;
-      height: 180px;
-      margin: 0 auto 15px;
-      border-radius: 15px;
+      width: 100%; /* 부모에 꽉 차게 */
+      height: 220px; /* [조정 가능] 사진 높이를 키움 */
+      margin: 0 auto 10px; /* 하단 여백 약간 */
+      border-radius: 0; /* 라운드 제거 (선택 사항, 필요시 15px로 복구) */
       overflow: hidden;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
       background: #1e293b;
-      border: 1px solid rgba(255,255,255,0.1);
-      cursor: pointer; /* 클릭 가능한 손가락 모양 */
+      /* 테두리와 그림자 제거 */
+      border: none; 
+      box-shadow: none; 
+      cursor: pointer; 
       transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
     .album-art-container:active {
-      transform: scale(0.98); /* 클릭 시 살짝 작아지는 효과 */
+      transform: scale(0.98);
       opacity: 0.8;
     }
 
@@ -100,6 +107,15 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+    /* ---------------------------------------------------- */
+
+    /* [수정] 컨트롤 영역은 양옆 여백을 위해 폭 제한 */
+    .song-info, .status-row, .progress-container, .controls {
+      width: 92%;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .song-info .title { 
@@ -130,15 +146,15 @@
     .bar.playing { animation: bounce 0.6s ease-in-out infinite alternate; }
     @keyframes bounce { from { height: 4px; } to { height: 14px; } }
 
-    .progress-container { width: 100%; cursor: pointer; padding: 5px 0; margin-bottom: 10px; }
+    .progress-container { width: 100%; cursor: pointer; padding: 5px 0; margin-bottom: 15px; /* 여백 증가 */ }
     .progress-bg { height: 2px; background: rgba(255, 255, 255, 0.1); }
     .progress-fill { width: 0%; height: 100%; background: var(--neon-blue); }
 
-    .controls { display: flex; justify-content: center; align-items: center; gap: 30px; }
+    .controls { display: flex; justify-content: center; align-items: center; gap: 40px; /* 간격 증가 */ padding-bottom: 10px; }
     .btn-play-box { 
       border: 1.5px solid var(--neon-blue); 
       border-radius: 50%; 
-      width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+      width: 50px; height: 50px; /* 크기 약간 증가 */ display: flex; align-items: center; justify-content: center;
       cursor: pointer;
     }
 
@@ -146,13 +162,13 @@
       flex: 1; 
       overflow-y: auto; 
       background: rgba(0,0,0,0.3); 
-      border-radius: 15px 15px 0 0;
+      border-radius: 20px 20px 0 0; /* 라운드 증가 */
       -webkit-overflow-scrolling: touch;
       margin-top: 10px;
     }    
     .playlist-table { width: 100%; border-collapse: collapse; }
     .playlist-table td { 
-      padding: 10px 18px; 
+      padding: 12px 18px; /* 위아래 간격 증가 */
       font-size: 14px; 
       border-bottom: 1px solid rgba(255,255,255,0.03); 
       color: #999; cursor: pointer; 
@@ -189,9 +205,9 @@
       <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
     </div>
     <div class="controls">
-      <button style="background:none;border:none;color:#666;font-size:20px;cursor:pointer;" id="btnPrev">⏮</button>
-      <div class="btn-play-box" id="btnPlayWrap"><span id="btnIcon" style="color:var(--neon-blue);font-size:20px;">▶</span></div>
-      <button style="background:none;border:none;color:#666;font-size:20px;cursor:pointer;" id="btnNext">⏭</button>
+      <button style="background:none;border:none;color:#666;font-size:24px;cursor:pointer;" id="btnPrev">⏮</button>
+      <div class="btn-play-box" id="btnPlayWrap"><span id="btnIcon" style="color:var(--neon-blue);font-size:24px;">▶</span></div>
+      <button style="background:none;border:none;color:#666;font-size:24px;cursor:pointer;" id="btnNext">⏭</button>
     </div>
   </div>
 </div>
@@ -201,7 +217,7 @@
 </div>
 
 <script>
-// 데이터 설정 (실제 경로에 맞춰 수정해서 사용하세요)
+// 데이터 설정 (이미지 경로를 실제 와이드 비율 이미지로 수정하세요)
 const playlists = {
     "enka": [
         {
@@ -412,7 +428,8 @@ curList.forEach((song, i) => {
 if (curList.length > 0) {
     albumArt.src = curList[0].image;
     labelTitle.textContent = curList[0].title;
-    albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/320x180?text=No+Image"; };
+    // 이미지 로드 실패 시 대체 이미지
+    albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/640x360?text=No+Image"; };
 }
 
 function formatTime(sec) {
@@ -446,7 +463,7 @@ function updateUI() {
     });
 }
 
-// [추가] 이미지 클릭 시 재생/일시정지
+// 이미지 클릭 시 재생/일시정지
 document.getElementById("albumArtBtn").onclick = togglePlay;
 
 // 기존 재생 버튼 클릭
