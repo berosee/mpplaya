@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>mpplay - Album Art Edition (Wide)</title>
+  <title>mpplay - Album Art Fixed</title>
   <style>
     :root {
       --neon-blue: #00d2ff;
@@ -76,10 +76,10 @@
       text-align: center; border: 1px solid rgba(0, 210, 255, 0.2);
     }
 
-    /* --- [수정] 앨범 아트 스타일: 와이드 비율로 조정 --- */
+    /* 앨범 아트 와이드 컨테이너 */
     .album-art-container {
-      width: 100%; /* 카드의 너비에 맞춤 */
-      height: 180px; /* 고정된 높이를 주거나 비율을 유지하는 방식으로 조정 가능 */
+      width: 100%;
+      height: 180px;
       margin: 0 auto 15px;
       border-radius: 15px;
       overflow: hidden;
@@ -91,10 +91,9 @@
     .album-art-container img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* 이미지가 꽉 차면서 비율을 유지하도록 설정 */
+      object-fit: cover;
       display: block;
     }
-    /* ----------------------------------------------- */
 
     .song-info .title { 
       font-size: 15px; 
@@ -169,7 +168,7 @@
 
   <div class="player-card">
     <div class="album-art-container">
-      <img id="albumArt" src="https://via.placeholder.com/320x180?text=No+Image" alt="Album Art">
+      <img id="albumArt" src="" alt="Album Art">
     </div>
     
     <div class="song-info"><div class="title" id="labelTitle">곡을 선택해 주세요</div></div>
@@ -195,7 +194,9 @@
 </div>
 
 <script>
-// 이미지 경로(image)를 데이터에 추가했습니다. (와이드 비율 이미지 권장)
+/** * [중요] 아래 image 경로를 실제 파일 경로로 수정하세요. 
+ * 예: "music/old/photo.jpg" 
+ */
 const playlists = {
     "enka": [
         {
@@ -376,14 +377,14 @@ const playlists = {
         {
             "title": "dave - The Happy Organ",
             "url": "music/old/dave - The Happy Organ.flac",
-            "image": "music/old/cover.jpg"}
-    ]
+            "image": "music/old/cover.jpg"}   ]
 };
 
 const params = new URLSearchParams(window.location.search);
 const curCat = params.get("cat") || "old";
 const curList = playlists[curCat] || playlists["old"];
 
+// 네비게이션 활성화
 document.querySelectorAll('.nav a').forEach(el => el.classList.remove('active'));
 const activeNav = document.getElementById("nav-" + curCat);
 if (activeNav) activeNav.classList.add("active");
@@ -393,13 +394,23 @@ let curIdx = 0;
 let isLoaded = false;
 const listTable = document.getElementById("listTable");
 const albumArt = document.getElementById("albumArt");
+const labelTitle = document.getElementById("labelTitle");
 
+// 리스트 생성 및 초기 화면 설정
 curList.forEach((song, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${song.title}</td>`;
     tr.onclick = () => playSong(i);
     listTable.appendChild(tr);
 });
+
+// [수정] 페이지 로드 시 첫 번째 곡 정보를 미리 표시 (액박 방지)
+if (curList.length > 0) {
+    albumArt.src = curList[0].image;
+    labelTitle.textContent = curList[0].title;
+    // 이미지 로드 실패 시 대체 이미지 처리
+    albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/320x180?text=No+Image"; };
+}
 
 function formatTime(sec) {
     if (!sec || isNaN(sec)) return "00:00";
@@ -416,10 +427,8 @@ function playSong(i) {
     audio.src = song.url;
     audio.play().catch(e => console.log("재생 차단됨"));
     
-    document.getElementById("labelTitle").textContent = song.title;
-    
-    // [수정] 앨범 이미지 업데이트 (이미지가 없을 경우 기본 와이드 이미지 처리)
-    albumArt.src = song.image || "https://via.placeholder.com/320x180?text=No+Image";
+    labelTitle.textContent = song.title;
+    albumArt.src = song.image;
     
     updateUI();
 }
@@ -428,11 +437,6 @@ function updateUI() {
     const rows = document.querySelectorAll("#listTable tr");
     rows.forEach((row, k) => {
         row.classList.toggle("active", k === curIdx);
-        if (k === curIdx) {
-            setTimeout(() => {
-                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 50);
-        }
     });
 }
 
