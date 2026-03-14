@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>mpplay - Frameless Edition</title>
+  <title>mpplay - Optimized Layout</title>
   <style>
     :root {
       --neon-blue: #00d2ff;
@@ -20,45 +20,43 @@
       align-items: center;
     }
 
+    /* 상단 고정 영역: PC에서도 최대폭을 제한하여 구도 유지 */
     .fixed-header {
       width: 100%;
+      max-width: 450px; /* PC에서 사진이 너무 커지지 않도록 제한 */
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #121212; /* 전체 배경색과 동일하게 */
+      background: #121212;
       z-index: 100;
-      padding-bottom: 10px; /* 여백 약간 추가 */
+      padding-bottom: 5px;
       flex-shrink: 0;
     }
 
-    /* 카테고리 네비게이션 및 리스트 폭 유지 */
     .nav, .playlist-wrapper {
       width: 92%;
-      max-width: 360px;
     }
 
     .nav { 
       display: flex; 
       gap: 8px; 
-      margin: 15px auto; 
+      margin: 10px auto; 
       background: rgba(255, 255, 255, 0.02); 
-      padding: 5px 15px; 
+      padding: 5px 12px; 
       border-radius: 50px; 
       width: fit-content;
-      min-width: 220px;
       justify-content: center;
     }
 
     .nav a { 
       flex: none; 
-      width: 65px; 
+      width: 60px; 
       text-decoration: none;
       background: #0a0a0a; 
       color: #444; 
-      padding: 6px 0; 
+      padding: 5px 0; 
       border-radius: 20px; 
       font-size: 10px; 
-      font-weight: 500; 
       text-align: center;
       transition: all 0.4s ease;
       border: 1px solid rgba(255, 255, 255, 0.03);
@@ -67,39 +65,24 @@
     .nav a.active { 
       background: #003366 !important; 
       color: var(--neon-blue) !important; 
-      box-shadow: 0 0 12px rgba(0, 210, 255, 0.4); 
       border: 1px solid var(--neon-blue); 
     }
 
-    /* --- [수정] 플레이어 카드: 배경색, 테두리, 그림자 모두 제거 --- */
     .player-card {
-      width: 100%; /* 화면에 꽉 차게 */
-      background: none; /* 배경색 제거 */
-      border-radius: 0; /* 라운드 제거 */
-      padding: 0; /* 내부 여백 제거 */
-      text-align: center; 
-      border: none; /* 테두리 제거 */
-      box-shadow: none; /* 그림자 제거 */
+      width: 100%;
+      background: none;
+      text-align: center;
     }
 
-    /* --- [수정] 앨범 아트: 크기를 키우고 화면에 맞춤 --- */
+    /* 앨범 아트: 모바일은 꽉 차게, PC는 위쪽 제한폭에 맞춤 */
     .album-art-container {
-      width: 100%; /* 부모에 꽉 차게 */
-      height: 220px; /* [조정 가능] 사진 높이를 키움 */
-      margin: 0 auto 10px; /* 하단 여백 약간 */
-      border-radius: 0; /* 라운드 제거 (선택 사항, 필요시 15px로 복구) */
+      width: 100%;
+      height: 200px; 
+      margin: 0 auto 8px;
       overflow: hidden;
       background: #1e293b;
-      /* 테두리와 그림자 제거 */
-      border: none; 
-      box-shadow: none; 
       cursor: pointer; 
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .album-art-container:active {
-      transform: scale(0.98);
-      opacity: 0.8;
+      transition: transform 0.2s ease;
     }
 
     .album-art-container img {
@@ -108,22 +91,12 @@
       object-fit: cover;
       display: block;
     }
-    /* ---------------------------------------------------- */
 
-    /* [수정] 컨트롤 영역은 양옆 여백을 위해 폭 제한 */
-    .song-info, .status-row, .progress-container, .controls {
-      width: 92%;
-      max-width: 360px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
+    /* 곡 제목 및 하단 컨트롤 줄간격 축소 (기존의 2/3 수준) */
     .song-info .title { 
-      font-size: 15px; 
+      font-size: 14px; /* 폰트 살짝 축소 */
       font-weight: bold; 
-      margin-bottom: 12px; 
-      height: 1.2em; 
-      overflow: hidden; 
+      margin-bottom: 6px; /* 줄간격 축소 */
       color: var(--neon-blue);
     }
 
@@ -131,52 +104,66 @@
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      padding: 0 5px;
-      margin-bottom: 12px; 
+      padding: 0 15px;
+      margin-bottom: 4px; /* 줄간격 축소 */
     }
 
     .time-display { 
-      font-size: 13px; 
+      font-size: 11px; /* 폰트 축소 */
       font-family: 'Consolas', monospace; 
-      color: #888;
+      color: #777;
     }
 
-    .bar-container { display: flex; gap: 3px; align-items: flex-end; height: 14px; }
-    .bar { width: 3px; background: var(--neon-blue); border-radius: 1px; height: 4px; }
+    .bar-container { display: flex; gap: 2px; align-items: flex-end; height: 10px; }
+    .bar { width: 2px; background: var(--neon-blue); height: 3px; }
     .bar.playing { animation: bounce 0.6s ease-in-out infinite alternate; }
-    @keyframes bounce { from { height: 4px; } to { height: 14px; } }
+    @keyframes bounce { from { height: 3px; } to { height: 10px; } }
 
-    .progress-container { width: 100%; cursor: pointer; padding: 5px 0; margin-bottom: 15px; /* 여백 증가 */ }
+    .progress-container { width: 92%; margin: 0 auto 8px; cursor: pointer; padding: 2px 0; }
     .progress-bg { height: 2px; background: rgba(255, 255, 255, 0.1); }
     .progress-fill { width: 0%; height: 100%; background: var(--neon-blue); }
 
-    .controls { display: flex; justify-content: center; align-items: center; gap: 40px; /* 간격 증가 */ padding-bottom: 10px; }
+    /* 재생 버튼 및 컨트롤 간격 축소 */
+    .controls { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 30px; /* 버튼 간격 축소 */
+      padding-bottom: 5px; 
+    }
+
     .btn-play-box { 
-      border: 1.5px solid var(--neon-blue); 
+      border: 1.2px solid var(--neon-blue); 
       border-radius: 50%; 
-      width: 50px; height: 50px; /* 크기 약간 증가 */ display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; /* 버튼 크기 축소 */
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
     }
 
+    /* 재생 아이콘 폰트 크기 조정 */
+    #btnIcon { font-size: 16px !important; color: var(--neon-blue); }
+    .btn-nav-small { font-size: 18px !important; color: #555; background: none; border: none; cursor: pointer; }
+
+    /* 하단 리스트 영역 */
     .playlist-wrapper { 
       flex: 1; 
+      width: 100%;
+      max-width: 450px; /* PC에서도 리스트 폭 제한 */
       overflow-y: auto; 
-      background: rgba(0,0,0,0.3); 
-      border-radius: 20px 20px 0 0; /* 라운드 증가 */
+      background: rgba(0,0,0,0.4); 
+      border-radius: 20px 20px 0 0;
       -webkit-overflow-scrolling: touch;
-      margin-top: 10px;
     }    
     .playlist-table { width: 100%; border-collapse: collapse; }
     .playlist-table td { 
-      padding: 12px 18px; /* 위아래 간격 증가 */
-      font-size: 14px; 
+      padding: 10px 18px; 
+      font-size: 13px; 
       border-bottom: 1px solid rgba(255,255,255,0.03); 
-      color: #999; cursor: pointer; 
+      color: #888; cursor: pointer; 
     }    
     .playlist-table tr.active td { 
       color: var(--neon-blue); 
-      font-weight: bold; 
-      background: rgba(0, 210, 255, 0.1); 
+      background: rgba(0, 210, 255, 0.08); 
     }
   </style>
 </head>
@@ -195,19 +182,22 @@
     </div>
     
     <div class="song-info"><div class="title" id="labelTitle">곡을 선택해 주세요</div></div>
+    
     <div class="status-row">
       <div class="bar-container" id="visualizer">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
       <div class="time-display"><span id="curTime">00:00</span> / <span id="durTime">00:00</span></div>
     </div>
+
     <div class="progress-container" id="progArea">
       <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
     </div>
+
     <div class="controls">
-      <button style="background:none;border:none;color:#666;font-size:24px;cursor:pointer;" id="btnPrev">⏮</button>
-      <div class="btn-play-box" id="btnPlayWrap"><span id="btnIcon" style="color:var(--neon-blue);font-size:24px;">▶</span></div>
-      <button style="background:none;border:none;color:#666;font-size:24px;cursor:pointer;" id="btnNext">⏭</button>
+      <button class="btn-nav-small" id="btnPrev">⏮</button>
+      <div class="btn-play-box" id="btnPlayWrap"><span id="btnIcon">▶</span></div>
+      <button class="btn-nav-small" id="btnNext">⏭</button>
     </div>
   </div>
 </div>
@@ -217,7 +207,7 @@
 </div>
 
 <script>
-// 데이터 설정 (이미지 경로를 실제 와이드 비율 이미지로 수정하세요)
+// 데이터 설정 (사용자님의 실제 파일명으로 관리하세요)
 const playlists = {
     "enka": [
         {
@@ -417,7 +407,6 @@ const listTable = document.getElementById("listTable");
 const albumArt = document.getElementById("albumArt");
 const labelTitle = document.getElementById("labelTitle");
 
-// 초기 리스트 및 화면 설정
 curList.forEach((song, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${song.title}</td>`;
@@ -428,8 +417,7 @@ curList.forEach((song, i) => {
 if (curList.length > 0) {
     albumArt.src = curList[0].image;
     labelTitle.textContent = curList[0].title;
-    // 이미지 로드 실패 시 대체 이미지
-    albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/640x360?text=No+Image"; };
+    albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/450x250?text=No+Image"; };
 }
 
 function formatTime(sec) {
@@ -439,7 +427,6 @@ function formatTime(sec) {
     return m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
 }
 
-// 재생 공통 함수
 function togglePlay() {
     if (!isLoaded) playSong(0);
     else audio.paused ? audio.play() : audio.pause();
@@ -448,25 +435,19 @@ function togglePlay() {
 function playSong(i) {
     curIdx = i;
     isLoaded = true;
-    const song = curList[curIdx];
-    audio.src = song.url;
-    audio.play().catch(e => console.log("재생 차단됨"));
-    labelTitle.textContent = song.title;
-    albumArt.src = song.image;
+    audio.src = curList[curIdx].url;
+    audio.play().catch(e => console.log("Play blocked"));
+    labelTitle.textContent = curList[curIdx].title;
+    albumArt.src = curList[curIdx].image;
     updateUI();
 }
 
 function updateUI() {
     const rows = document.querySelectorAll("#listTable tr");
-    rows.forEach((row, k) => {
-        row.classList.toggle("active", k === curIdx);
-    });
+    rows.forEach((row, k) => row.classList.toggle("active", k === curIdx));
 }
 
-// 이미지 클릭 시 재생/일시정지
 document.getElementById("albumArtBtn").onclick = togglePlay;
-
-// 기존 재생 버튼 클릭
 document.getElementById("btnPlayWrap").onclick = togglePlay;
 
 audio.ontimeupdate = () => {
@@ -477,17 +458,13 @@ audio.ontimeupdate = () => {
     }
 };
 
-audio.onloadedmetadata = () => {
-    document.getElementById("durTime").textContent = formatTime(audio.duration);
-};
-
-audio.onplay = () => {
-    document.getElementById("btnIcon").textContent = "Ⅱ";
+audio.onloadedmetadata = () => { document.getElementById("durTime").textContent = formatTime(audio.duration); };
+audio.onplay = () => { 
+    document.getElementById("btnIcon").textContent = "Ⅱ"; 
     document.querySelectorAll(".bar").forEach(b => b.classList.add("playing"));
 };
-
-audio.onpause = () => {
-    document.getElementById("btnIcon").textContent = "▶";
+audio.onpause = () => { 
+    document.getElementById("btnIcon").textContent = "▶"; 
     document.querySelectorAll(".bar").forEach(b => b.classList.remove("playing"));
 };
 
