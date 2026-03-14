@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>mpplay - Album Art Fixed</title>
+  <title>mpplay - Album Art Click Feature</title>
   <style>
     :root {
       --neon-blue: #00d2ff;
@@ -76,7 +76,7 @@
       text-align: center; border: 1px solid rgba(0, 210, 255, 0.2);
     }
 
-    /* 앨범 아트 와이드 컨테이너 */
+    /* [수정] 앨범 아트 컨테이너: 클릭 가능하게 커서 변경 및 효과 추가 */
     .album-art-container {
       width: 100%;
       height: 180px;
@@ -86,6 +86,13 @@
       box-shadow: 0 10px 20px rgba(0,0,0,0.5);
       background: #1e293b;
       border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer; /* 클릭 가능한 손가락 모양 */
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .album-art-container:active {
+      transform: scale(0.98); /* 클릭 시 살짝 작아지는 효과 */
+      opacity: 0.8;
     }
 
     .album-art-container img {
@@ -167,7 +174,7 @@
   </div>
 
   <div class="player-card">
-    <div class="album-art-container">
+    <div class="album-art-container" id="albumArtBtn">
       <img id="albumArt" src="" alt="Album Art">
     </div>
     
@@ -194,9 +201,7 @@
 </div>
 
 <script>
-/** * [중요] 아래 image 경로를 실제 파일 경로로 수정하세요. 
- * 예: "music/old/photo.jpg" 
- */
+// 데이터 설정 (실제 경로에 맞춰 수정해서 사용하세요)
 const playlists = {
     "enka": [
         {
@@ -377,14 +382,13 @@ const playlists = {
         {
             "title": "dave - The Happy Organ",
             "url": "music/old/dave - The Happy Organ.flac",
-            "image": "music/old/cover.jpg"}   ]
+            "image": "music/old/cover.jpg"}    ]
 };
 
 const params = new URLSearchParams(window.location.search);
 const curCat = params.get("cat") || "old";
 const curList = playlists[curCat] || playlists["old"];
 
-// 네비게이션 활성화
 document.querySelectorAll('.nav a').forEach(el => el.classList.remove('active'));
 const activeNav = document.getElementById("nav-" + curCat);
 if (activeNav) activeNav.classList.add("active");
@@ -396,7 +400,7 @@ const listTable = document.getElementById("listTable");
 const albumArt = document.getElementById("albumArt");
 const labelTitle = document.getElementById("labelTitle");
 
-// 리스트 생성 및 초기 화면 설정
+// 초기 리스트 및 화면 설정
 curList.forEach((song, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${song.title}</td>`;
@@ -404,11 +408,9 @@ curList.forEach((song, i) => {
     listTable.appendChild(tr);
 });
 
-// [수정] 페이지 로드 시 첫 번째 곡 정보를 미리 표시 (액박 방지)
 if (curList.length > 0) {
     albumArt.src = curList[0].image;
     labelTitle.textContent = curList[0].title;
-    // 이미지 로드 실패 시 대체 이미지 처리
     albumArt.onerror = () => { albumArt.src = "https://via.placeholder.com/320x180?text=No+Image"; };
 }
 
@@ -419,17 +421,20 @@ function formatTime(sec) {
     return m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
 }
 
+// 재생 공통 함수
+function togglePlay() {
+    if (!isLoaded) playSong(0);
+    else audio.paused ? audio.play() : audio.pause();
+}
+
 function playSong(i) {
     curIdx = i;
     isLoaded = true;
     const song = curList[curIdx];
-    
     audio.src = song.url;
     audio.play().catch(e => console.log("재생 차단됨"));
-    
     labelTitle.textContent = song.title;
     albumArt.src = song.image;
-    
     updateUI();
 }
 
@@ -440,10 +445,11 @@ function updateUI() {
     });
 }
 
-document.getElementById("btnPlayWrap").onclick = () => {
-    if (!isLoaded) playSong(0);
-    else audio.paused ? audio.play() : audio.pause();
-};
+// [추가] 이미지 클릭 시 재생/일시정지
+document.getElementById("albumArtBtn").onclick = togglePlay;
+
+// 기존 재생 버튼 클릭
+document.getElementById("btnPlayWrap").onclick = togglePlay;
 
 audio.ontimeupdate = () => {
     if (audio.duration) {
