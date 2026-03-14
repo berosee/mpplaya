@@ -385,6 +385,7 @@ const playlists = {
             "image": "music/old/cover.jpg"}    ]
 };
 
+
 const params = new URLSearchParams(window.location.search);
 const curCat = params.get("cat") || "old";
 const curList = playlists[curCat] || playlists["old"];
