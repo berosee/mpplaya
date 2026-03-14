@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>mpplay - Album Art Edition</title>
+  <style>
+    :root {
+      --neon-blue: #00d2ff;
+      --deep-blue: #4a7cff;
+    }
+
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #121212; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .fixed-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #121212;
+      z-index: 100;
+      padding-bottom: 5px;
+      flex-shrink: 0;
+    }
+
+    .player-card, .playlist-wrapper {
+      width: 92%;
+      max-width: 360px;
+    }
+
+    .nav { 
+      display: flex; 
+      gap: 8px; 
+      margin: 15px auto; 
+      background: rgba(255, 255, 255, 0.02); 
+      padding: 5px 15px; 
+      border-radius: 50px; 
+      width: fit-content;
+      min-width: 220px;
+      justify-content: center;
+    }
+
+    .nav a { 
+      flex: none; 
+      width: 65px; 
+      text-decoration: none;
+      background: #0a0a0a; 
+      color: #444; 
+      padding: 6px 0; 
+      border-radius: 20px; 
+      font-size: 10px; 
+      font-weight: 500; 
+      text-align: center;
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .nav a.active { 
+      background: #003366 !important; 
+      color: var(--neon-blue) !important; 
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.4); 
+      border: 1px solid var(--neon-blue); 
+    }
+
+    .player-card {
+      background: #0f172a;
+      border-radius: 20px; padding: 15px 18px;
+      text-align: center; border: 1px solid rgba(0, 210, 255, 0.2);
+    }
+
+    /* --- 앨범 아트 스타일 추가 --- */
+    .album-art-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 15px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .album-art-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* -------------------------- */
+
+    .song-info .title { 
+      font-size: 15px; 
+      font-weight: bold; 
+      margin-bottom: 12px; 
+      height: 1.2em; 
+      overflow: hidden; 
+      color: var(--neon-blue);
+    }
+
+    .status-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0 5px;
+      margin-bottom: 12px; 
+    }
+
+    .time-display { 
+      font-size: 13px; 
+      font-family: 'Consolas', monospace; 
+      color: #888;
+    }
+
+    .bar-container { display: flex; gap: 3px; align-items: flex-end; height: 14px; }
+    .bar { width: 3px; background: var(--neon-blue); border-radius: 1px; height: 4px; }
+    .bar.playing { animation: bounce 0.6s ease-in-out infinite alternate; }
+    @keyframes bounce { from { height: 4px; } to { height: 14px; } }
+
+    .progress-container { width: 100%; cursor: pointer; padding: 5px 0; margin-bottom: 10px; }
+    .progress-bg { height: 2px; background: rgba(255, 255, 255, 0.1); }
+    .progress-fill { width: 0%; height: 100%; background: var(--neon-blue); }
+
+    .controls { display: flex; justify-content: center; align-items: center; gap: 30px; }
+    .btn-play-box { 
+      border: 1.5px solid var(--neon-blue); 
+      border-radius: 50%; 
+      width: 46px; height: 46px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    .playlist-wrapper { 
+      flex: 1; 
+      overflow-y: auto; 
+      background: rgba(0,0,0,0.3); 
+      border-radius: 15px 15px 0 0;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
+    }    
+    .playlist-table { width: 100%; border-collapse: collapse; }
+    .playlist-table td { 
+      padding: 10px 18px; 
+      font-size: 14px; 
+      border-bottom: 1px solid rgba(255,255,255,0.03); 
+      color: #999; cursor: pointer; 
+    }    
+    .playlist-table tr.active td { 
+      color: var(--neon-blue); 
+      font-weight: bold; 
+      background: rgba(0, 210, 255, 0.1); 
+    }
+  </style>
+</head>
+<body>
+
+<div class="fixed-header">
+  <div class="nav">
+    <a href="?cat=old" id="nav-old">OLD</a>
+    <a href="?cat=enka" id="nav-enka">ENKA</a>
+    <a href="?cat=jazz" id="nav-jazz">JAZZ</a>
+  </div>
+
+  <div class="player-card">
+    <div class="album-art-container">
+      <img id="albumArt" src="https://via.placeholder.com/150?text=No+Image" alt="Album Art">
+    </div>
+    
+    <div class="song-info"><div class="title" id="labelTitle">곡을 선택해 주세요</div></div>
+    <div class="status-row">
+      <div class="bar-container" id="visualizer">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      </div>
+      <div class="time-display"><span id="curTime">00:00</span> / <span id="durTime">00:00</span></div>
+    </div>
+    <div class="progress-container" id="progArea">
+      <div class="progress-bg"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+    <div class="controls">
+      <button style="background:none;border:none;color:#666;font-size:20px;cursor:pointer;" id="btnPrev">⏮</button>
+      <div class="btn-play-box" id="btnPlayWrap"><span id="btnIcon" style="color:var(--neon-blue);font-size:20px;">▶</span></div>
+      <button style="background:none;border:none;color:#666;font-size:20px;cursor:pointer;" id="btnNext">⏭</button>
+    </div>
+  </div>
+</div>
+
+<div class="playlist-wrapper" id="scrollContainer">
+  <table class="playlist-table" id="listTable"></table>
+</div>
+
+<script>
+// 이미지 경로(image)를 데이터에 추가했습니다.
+const playlists = {
+    "enka": [
+        {
+            "title": "Four Seasons 'Autumn'-  Allegro (La Caccia)",
+            "url": "music/enka/Four Seasons 'Autumn'-  Allegro (La Caccia).mp3",          
+            "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Autumn'- Adagio",
+            "url": "music/enka/Four Seasons 'Autumn'- Adagio.mp3",
+           "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Autumn'- Allegro",
+            "url": "music/enka/Four Seasons 'Autumn'- Allegro.mp3",
+           "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Spring'- Allegro (danza)",
+            "url": "music/enka/Four Seasons 'Spring'- Allegro (danza).mp3",
+           "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Spring'- Allegro",
+            "url": "music/enka/Four Seasons 'Spring'- Allegro.mp3",
+            "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Spring'- Largo e pianissimo",
+            "url": "music/enka/Four Seasons 'Spring'- Largo e pianissimo.mp3",
+           "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Summer'-  Adagio, presto",
+            "url": "music/enka/Four Seasons 'Summer'-  Adagio, presto.mp3",
+           "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Summer'-  Presto (tempo o)",
+            "url": "music/enka/Four Seasons 'Summer'-  Presto (tempo o).mp3",
+            "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Summer'- Allegro non molto",
+            "url": "music/enka/Four Seasons 'Summer'- Allegro non molto.mp3",
+              "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Winter'- Allegro non molto",
+            "url": "music/enka/Four Seasons 'Winter'- Allegro non molto.mp3",
+             "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Winter'- Allegro",
+            "url": "music/enka/Four Seasons 'Winter'- Allegro.mp3",
+            "image": "music/enka/cover.jpg"},
+        {
+            "title": "Four Seasons 'Winter'- Largo",
+            "url": "music/enka/Four Seasons 'Winter'- Largo.mp3",
+          "image": "music/enka/cover.jpg"}
+    ],
+    "jazz": [
+                 {
+            "title": "Andy Williams - Love Is Blue",
+            "url": "music/jazz/Andy Williams - Love Is Blue.flac", 
+            "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Barbra Streisand - Woman In Love",
+            "url": "music/jazz/Barbra Streisand - Woman In Love.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Cliff Richard - The Young Ones",
+            "url": "music/jazz/Cliff Richard - The Young Ones.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Don Backy - Casabianca",
+            "url": "music/jazz/Don Backy - Casabianca.flac", "image": 
+              "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Irene Cara - Fame",
+            "url": "music/jazz/Irene Cara - Fame.flac", 
+            "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Jewel - Foolish Games",
+            "url": "music/jazz/Jewel - Foolish Games.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Leif Garrett - I Was Made for Dancin'",
+            "url": "music/jazz/Leif Garrett - I Was Made for Dancin'.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Lynn Anderson - When I Dream",
+            "url": "music/jazz/Lynn Anderson - When I Dream.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Patti Page - Tenesee waltz",
+            "url": "music/jazz/Patti Page - Tenesee waltz.flac", "image": 
+             "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Righteous Brothers - Unchained melody",
+            "url": "music/jazz/Righteous Brothers - Unchained melody.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Rod Stewart - Sailing",
+            "url": "music/jazz/Rod Stewart - Sailing.flac", 
+            "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Scott McKenzie - San Fransisco",
+            "url": "music/jazz/Scott McKenzie - San Fransisco.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "The Beatles - Let It Be",
+            "url": "music/jazz/The Beatles - Let It Be.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "The Beatles - Yesterday",
+            "url": "music/jazz/The Beatles - Yesterday.flac", 
+             "image": "music/jazz/cover.jpg"
+        },
+        {
+            "title": "Village Stompers, The - Washington Square",
+            "url": "music/jazz/Village Stompers, The - Washington Square.flac", 
+             "image": "music/jazz/cover.jpg"
+        }
+    ],
+     "old": [
+         {
+            "title": "Beyonce - TEXAS HOLD EM",
+            "url": "music/old/Beyonce - TEXAS HOLD EM.mp3",
+             "image": "music/old/cover.jpg"},
+        {
+            "title": "Daniel - Blackboard of My Heart",
+            "url": "music/old/Daniel - Blackboard of My Heart.mp3",
+           "image": "music/old/cover.jpg"},
+        {
+            "title": "Daniel - Pretty Little Girl From Omagh",
+            "url": "music/old/Daniel - Pretty Little Girl From Omagh.mp3",
+             "image": "music/old/cover.jpg"},
+        {
+            "title": "Green Green Grass Of Home",
+            "url": "music/old/Green Green Grass Of Home.mp3",
+            "image": "music/old/cover.jpg"},
+        {
+            "title": "Isla Grant - Every Moment Of Every Hour",
+            "url": "music/old/Isla Grant - Every Moment Of Every Hour.mp3",
+             "image": "music/old/cover.jpg"},
+        {
+            "title": "Isla Grant - Only Yesterday",
+            "url": "music/old/Isla Grant - Only Yesterday.mp3",
+           "image": "music/old/cover.jpg"},
+        {
+            "title": "Jonny Cash - Cotton Fields",
+            "url": "music/old/Jonny Cash - Cotton Fields.mp3",
+            "image": "music/old/cover.jpg"},
+        {
+            "title": "Mary Duff - Just Lovin' You",
+            "url": "music/old/Mary Duff - Just Lovin' You.mp3",
+            "image": "music/old/cover.jpg"},
+        {
+            "title": "Mary Duff - Power Of Love",
+            "url": "music/old/Mary Duff - Power Of Love.mp3",
+           "image": "music/old/cover.jpg"},
+        {
+            "title": "Mary Duff - Will You Walk With Me",
+            "url": "music/old/Mary Duff - Will You Walk With Me.mp3",
+           "image": "music/old/cover.jpg"},
+        {
+            "title": "The Carpenters - Yesterday Once More",
+            "url": "music/old/The Carpenters - Yesterday Once More.mp3",
+            "image": "music/old/cover.jpg"},
+        {
+            "title": "Tom Jones - Delilah",
+            "url": "music/old/Tom Jones - Delilah.mp3",
+           "image": "music/old/cover.jpg"},
+        {
+            "title": "dave - The Happy Organ",
+            "url": "music/old/dave - The Happy Organ.flac",
+            "image": "music/old/cover.jpg"}
+    ]
+};
+
+const params = new URLSearchParams(window.location.search);
+const curCat = params.get("cat") || "old";
+const curList = playlists[curCat] || playlists["old"];
+
+document.querySelectorAll('.nav a').forEach(el => el.classList.remove('active'));
+const activeNav = document.getElementById("nav-" + curCat);
+if (activeNav) activeNav.classList.add("active");
+
+const audio = new Audio();
+let curIdx = 0;
+let isLoaded = false;
+const listTable = document.getElementById("listTable");
+const albumArt = document.getElementById("albumArt");
+
+curList.forEach((song, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${song.title}</td>`;
+    tr.onclick = () => playSong(i);
+    listTable.appendChild(tr);
+});
+
+function formatTime(sec) {
+    if (!sec || isNaN(sec)) return "00:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0');
+}
+
+function playSong(i) {
+    curIdx = i;
+    isLoaded = true;
+    const song = curList[curIdx];
+    
+    audio.src = song.url;
+    audio.play().catch(e => console.log("재생 차단됨"));
+    
+    document.getElementById("labelTitle").textContent = song.title;
+    
+    // 앨범 이미지 업데이트 (이미지가 없을 경우 기본 이미지 처리)
+    albumArt.src = song.image || "https://via.placeholder.com/150?text=No+Image";
+    
+    updateUI();
+}
+
+function updateUI() {
+    const rows = document.querySelectorAll("#listTable tr");
+    rows.forEach((row, k) => {
+        row.classList.toggle("active", k === curIdx);
+        if (k === curIdx) {
+            setTimeout(() => {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 50);
+        }
+    });
+}
+
+document.getElementById("btnPlayWrap").onclick = () => {
+    if (!isLoaded) playSong(0);
+    else audio.paused ? audio.play() : audio.pause();
+};
+
+audio.ontimeupdate = () => {
+    if (audio.duration) {
+        document.getElementById("curTime").textContent = formatTime(audio.currentTime);
+        document.getElementById("durTime").textContent = formatTime(audio.duration);
+        document.getElementById("progFill").style.width = (audio.currentTime / audio.duration * 100) + "%";
+    }
+};
+
+audio.onloadedmetadata = () => {
+    document.getElementById("durTime").textContent = formatTime(audio.duration);
+};
+
+audio.onplay = () => {
+    document.getElementById("btnIcon").textContent = "Ⅱ";
+    document.querySelectorAll(".bar").forEach(b => b.classList.add("playing"));
+};
+
+audio.onpause = () => {
+    document.getElementById("btnIcon").textContent = "▶";
+    document.querySelectorAll(".bar").forEach(b => b.classList.remove("playing"));
+};
+
+audio.onended = () => document.getElementById("btnNext").onclick();
+document.getElementById("btnNext").onclick = () => playSong((curIdx + 1) % curList.length);
+document.getElementById("btnPrev").onclick = () => playSong((curIdx - 1 + curList.length) % curList.length);
+
+document.getElementById("progArea").onclick = (e) => {
+    if (audio.duration) {
+        audio.currentTime = (e.offsetX / document.getElementById("progArea").clientWidth) * audio.duration;
+    }
+};
+</script>
+</body>
+</html>
