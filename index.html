@@ -21,18 +21,16 @@
       align-items: center;
     }
 
-    /* 상단 고정 영역: PC에서도 최대폭을 제한하여 구도 유지 */
-    .fixed-header {
-      width: 100%;
-      max-width: 450px; /* PC에서 사진이 너무 커지지 않도록 제한 */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #121212;
-      z-index: 100;
-      padding-bottom: 5px;
-      flex-shrink: 0;
-    }
+   /* 1. 상단 헤더 영역의 최대 폭을 제한하여 PC/모바일 모두 안정적인 구도 유지 */
+.fixed-header {
+    width: 100%;
+    max-width: 450px; /* 너무 퍼지지 않게 제한 */
+    margin: 0 auto;
+    background: #121212;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
     .nav, .playlist-wrapper {
       width: 92%;
@@ -69,38 +67,48 @@
       border: 1px solid var(--neon-blue); 
     }
 
-    .player-card {
-      width: 100%;
-      background: none;
-      text-align: center;
-    }
+   /* 2. [핵심] 플레이어 카드에 좌우 여백 추가 */
+.player-card {
+    width: 90%; /* 화면의 90%만 사용 (좌우 5%씩 여백 발생) */
+    background: none;
+    text-align: center;
+    padding: 10px 0;
+}
+/* 3. [핵심] 앨범 아트 컨테이너 설정 */
+.album-art-container {
+    width: 100%; 
+    height: auto; 
+    aspect-ratio: 800 / 500; /* 사진의 원래 비율(800:500) 고정 */
+    margin: 0 auto 12px;
+    border-radius: 15px; /* 사진 모서리 둥글게 (api방식과 동일) */
+    overflow: hidden;
+    background: #1e293b;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4); /* 입체감 추가 */
+}
 
-    /* 앨범 아트: 모바일은 꽉 차게, PC는 위쪽 제한폭에 맞춤 */
-    .album-art-container {
-      width: 100%;
-      height: 200px; 
-      margin: 0 auto 8px;
-      overflow: hidden;
-      background: #1e293b;
-      cursor: pointer; 
-      transition: transform 0.2s ease;
-    }
+.album-art-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 영역에 꽉 차게 */
+    display: block;
+}
 
-    .album-art-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+/* 4. 곡명 및 컨트롤러 간격 미세 조정 */
+.song-info .title { 
+    font-size: 15px; 
+    font-weight: bold; 
+    margin-bottom: 8px;
+    color: var(--neon-blue);
+}
 
-    /* 곡 제목 및 하단 컨트롤 줄간격 축소 (기존의 2/3 수준) */
-    .song-info .title { 
-      font-size: 14px; /* 폰트 살짝 축소 */
-      font-weight: bold; 
-      margin-bottom: 6px; /* 줄간격 축소 */
-      color: var(--neon-blue);
-    }
-
+.controls { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 20px; 
+    padding: 10px 0;
+}
     .status-row { 
       display: flex; 
       justify-content: space-between; 
