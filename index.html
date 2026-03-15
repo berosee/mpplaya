@@ -69,10 +69,11 @@
 
    /* 2. [핵심] 플레이어 카드에 좌우 여백 추가 */
 .player-card {
-    width: 90%; /* 화면의 90%만 사용 (좌우 5%씩 여백 발생) */
-    background: none;
+    width: 88%;
+    max-width: 400px;
     text-align: center;
-    padding: 10px 0;
+    padding: 2px 0; /* 상하 전체 여백을 최소화 (기존 10px -> 2px) */
+    margin: 0 auto;
 }
 /* 3. [핵심] 앨범 아트 컨테이너 설정 */
 .album-art-container {
@@ -96,9 +97,10 @@
 
 /* 4. 곡명 및 컨트롤러 간격 미세 조정 */
 .song-info .title { 
-    font-size: 15px; 
+    font-size: 14px; 
     font-weight: bold; 
-    margin-bottom: 8px;
+    line-height: 1.1; /* 줄 높이를 1.1로 타이트하게 조정 */
+    margin-bottom: 4px; /* 아래쪽 간격 축소 */
     color: var(--neon-blue);
 }
 
@@ -117,40 +119,62 @@
       margin-bottom: 4px; /* 줄간격 축소 */
     }
 
-    .time-display { 
-      font-size: 11px; /* 폰트 축소 */
-      font-family: 'Consolas', monospace; 
-      color: #777;
-    }
+   .time-display { 
+    font-size: 11px; 
+    line-height: 1; /* 시간 표시 줄 높이 최소화 */
+    margin-bottom: 6px; /* 프로그레스 바와의 간격 축소 */
+    color: #777;
+}
+
 
     .bar-container { display: flex; gap: 2px; align-items: flex-end; height: 10px; }
     .bar { width: 2px; background: var(--neon-blue); height: 3px; }
     .bar.playing { animation: bounce 0.6s ease-in-out infinite alternate; }
     @keyframes bounce { from { height: 3px; } to { height: 10px; } }
 
-    .progress-container { width: 92%; margin: 0 auto 8px; cursor: pointer; padding: 2px 0; }
+   .progress-container { 
+    width: 100%; 
+    margin-bottom: 8px; /* 재생 버튼과의 간격 축소 */
+    padding: 2px 0; 
+}
     .progress-bg { height: 2px; background: rgba(255, 255, 255, 0.1); }
     .progress-fill { width: 0%; height: 100%; background: var(--neon-blue); }
 
-    /* 재생 버튼 및 컨트롤 간격 축소 */
-    .controls { 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 30px; /* 버튼 간격 축소 */
-      padding-bottom: 5px; 
-    }
+    /* 재생 버튼(컨트롤) 구역의 높이와 간격 집중 축소 */
+.controls { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    gap: 15px; 
+    padding: 2px 0; /* 컨트롤 구역 자체의 상하 패딩 최소화 */
+}
 
-    .btn-play-box { 
-      border: 1.2px solid var(--neon-blue); 
-      border-radius: 50%; 
-      width: 40px; height: 40px; /* 버튼 크기 축소 */
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-    }
+.btn-nav {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #222;
+    border-radius: 30px;
+    padding: 4px 12px; /* 버튼 내부 위아래 여백 축소 */
+    font-size: 11px;
+    line-height: 1; /* 텍스트 줄 높이 축소 */
+    cursor: pointer;
+}
 
-    /* 재생 아이콘 폰트 크기 조정 */
-    #btnIcon { font-size: 16px !important; color: var(--neon-blue); }
+.btn-play-box { 
+    border: 1.5px solid var(--neon-blue); 
+    border-radius: 50%; 
+    width: 36px; /* 버튼 크기를 살짝 더 줄여 컴팩트하게 (기존 38px -> 36px) */
+    height: 36px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    background: #0a0a0a;
+}
+
+#btnIcon { 
+    font-size: 15px !important; /* 재생 아이콘 크기 미세 조정 */
+    line-height: 1;
+}
     .btn-nav-small { font-size: 18px !important; color: #555; background: none; border: none; cursor: pointer; }
 
     /* 하단 리스트 영역 */
